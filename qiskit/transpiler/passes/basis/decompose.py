@@ -12,9 +12,8 @@
 
 """Expand a gate in a circuit using its decomposition rules."""
 
-from typing import Type
+from fnmatch import fnmatch
 
-from qiskit.circuit.gate import Gate
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.dagcircuit.dagcircuit import DAGCircuit
 from qiskit.converters.circuit_to_dag import circuit_to_dag
@@ -23,14 +22,14 @@ from qiskit.converters.circuit_to_dag import circuit_to_dag
 class Decompose(TransformationPass):
     """Expand a gate in a circuit using its decomposition rules."""
 
-    def __init__(self, gate: Type[Gate] = None):
+    def __init__(self, gates_to_decompose: list = None):
         """Decompose initializer.
 
         Args:
             gate: gate to decompose.
         """
         super().__init__()
-        self.gate = gate
+        self.gates = gates_to_decompose
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         """Run the Decompose pass on `dag`.
@@ -42,18 +41,26 @@ class Decompose(TransformationPass):
             output dag where ``gate`` was expanded.
         """
         # Walk through the DAG and expand each non-basis node
-        for node in dag.op_nodes(self.gate):
-            # opaque or built-in gates are not decomposable
-            if not node.op.definition:
-                continue
-            # TODO: allow choosing among multiple decomposition rules
-            rule = node.op.definition.data
-
-            if len(rule) == 1 and len(node.qargs) == len(rule[0][1]) == 1:
-                if node.op.definition.global_phase:
-                    dag.global_phase += node.op.definition.global_phase
-                dag.substitute_node(node, rule[0][0], inplace=True)
+        for node in dag.op_nodes():
+            checklist = []
+            if hasattr(node.op, 'label'):
+                print(node.op.label)
+                checklist = [ node.name, node.op.label]
             else:
-                decomposition = circuit_to_dag(node.op.definition)
-                dag.substitute_node_with_dag(node, decomposition)
+                checklist = [node.name]
+            
+            if self.gates is None or any(x in self.gates for x in checklist) or any(fnmatch(node.name, p) for p in self.gates):
+                # opaque or built-in gates are not decomposable
+                if not node.op.definition:
+                    continue
+                # TODO: allow choosing among multiple decomposition rules
+                rule = node.op.definition.data
+
+                if len(rule) == 1 and len(node.qargs) == len(rule[0][1]) == 1:
+                    if node.op.definition.global_phase:
+                        dag.global_phase += node.op.definition.global_phase
+                    dag.substitute_node(node, rule[0][0], inplace=True)
+                else:
+                    decomposition = circuit_to_dag(node.op.definition)
+                    dag.substitute_node_with_dag(node, decomposition)
         return dag
