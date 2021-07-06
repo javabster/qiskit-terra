@@ -197,9 +197,18 @@ class Results:
 
 
 if __name__ == "__main__":
-    RESULT_FILES = []
-    for file in os.listdir(os.path.join(SWD, "mpl")):
+    # collect results for circuit tests
+    RESULT_FILES_CIRCUIT = []
+    for file in os.listdir(os.path.join(SWD, "mpl/circuit")):
         if file.endswith(".png") and not file.endswith(".diff.png"):
-            RESULT_FILES.append(file)
-    RESULTS = Results(sorted(RESULT_FILES), "mpl")
-    RESULTS.diff_images()
+            RESULT_FILES_CIRCUIT.append(file)
+    RESULTS_CIRCUIT = Results(sorted(RESULT_FILES_CIRCUIT), "mpl/circuit")
+    RESULTS_CIRCUIT.diff_images()
+
+    # collect results for graph tests
+    RESULT_FILES_GRAPH = []
+    for file in os.listdir(os.path.join(SWD, "mpl/graph")):
+        if file.endswith(".png") and not file.endswith(".diff.png"):
+            RESULT_FILES_GRAPH.append(file)
+    RESULTS_GRAPH = Results(sorted(RESULT_FILES_GRAPH), "mpl/graph")
+    RESULTS_GRAPH.diff_images()
