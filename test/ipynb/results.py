@@ -119,6 +119,7 @@ class Results:
 
     def diff_images(self):
         """Creates the table with the image comparison"""
+        print(self.directory)
         for name in self.names:
             ratio = diff_name = title = None
             fullpath_name = os.path.join(self.directory, name)
