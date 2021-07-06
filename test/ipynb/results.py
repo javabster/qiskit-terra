@@ -126,6 +126,7 @@ class Results:
             ratio = diff_name = title = None
             fullpath_name = os.path.join(self.directory, name)
             fullpath_reference = os.path.join(self.directory, "references", name)
+            print(fullpath_reference)
 
             if os.path.exists(os.path.join(SWD, fullpath_reference)):
                 ratio, diff_name = Results._similarity_ratio(fullpath_name, fullpath_reference)
