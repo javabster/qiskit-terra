@@ -26,6 +26,7 @@ class Results:
     def __init__(self, names, directory):
         self.names = names
         self.directory = directory
+        self.sub_dir = directory.split("mpl/", 1)[1]
         self.data = {}
         self.exact_match = []
         self.mismatch = []
@@ -149,16 +150,16 @@ class Results:
         ret = ""
 
         if len(self.mismatch) >= 2:
-            Results._zipfiles(self.mismatch, "mpl/circuit/mismatch.zip")
+            Results._zipfiles(self.mismatch, "{self.directory}/mismatch.zip")
             ret += (
-                '<div><a href="mpl/circuit/mismatch.zip">'
+                '<div><a href="{self.directory}/mismatch.zip">'
                 "Download %s mismatch results as a zip</a></div>" % len(self.mismatch)
             )
 
         if len(self.missing) >= 2:
-            Results._zipfiles(self.missing, "mpl/circuit/missing.zip")
+            Results._zipfiles(self.missing, "{self.directory}/missing.zip")
             ret += (
-                '<div><a href="mpl/circuit/missing.zip">'
+                '<div><a href="{self.directory}/missing.zip">'
                 "Download %s missing results as a zip</a></div>" % len(self.missing)
             )
 
@@ -197,8 +198,8 @@ class Results:
 
 if __name__ == "__main__":
     RESULT_FILES = []
-    for file in os.listdir(os.path.join(SWD, "mpl/circuit")):
+    for file in os.listdir(os.path.join(SWD, "mpl")):
         if file.endswith(".png") and not file.endswith(".diff.png"):
             RESULT_FILES.append(file)
-    RESULTS = Results(sorted(RESULT_FILES), "mpl/circuit")
+    RESULTS = Results(sorted(RESULT_FILES), "mpl")
     RESULTS.diff_images()
